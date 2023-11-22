@@ -1,4 +1,4 @@
-import { ApolloClient, useApolloClient, useMutation } from "@apollo/client";
+import { useApolloClient, useMutation } from "@apollo/client";
 import { SIGN_IN } from "../grahql/mutations";
 
 import useAuthStorage from "./useAuthStorage";
@@ -8,13 +8,10 @@ const useSignIn = () => {
   const authStorage = useAuthStorage();
   const client = useApolloClient();
 
-  //console.log("useaushorage", useAuthStorage());
   const [mutate, result] = useMutation(SIGN_IN);
   const navigate = useNavigate();
 
   const signIn = async ({ username, password }) => {
-    // call the mutate function here with the right arguments
-
     const result = await mutate({
       variables: { credentials: { username, password } },
     });

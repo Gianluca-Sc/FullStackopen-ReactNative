@@ -1,21 +1,16 @@
 import { Formik } from "formik";
-import {
-  Alert,
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableWithoutFeedback,
-  View,
-} from "react-native";
+import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import FormikTextInput from "./FormikTextInput";
 
 import theme from "./theme";
 import * as yup from "yup";
+import useSignUp from "../hooks/useSignUp";
 import useSignIn from "../hooks/useSignIn";
 
 const initialValues = {
   username: "",
   password: "",
+  passwordConfirmation: "",
 };
 
 const styles = StyleSheet.create({
@@ -37,11 +32,16 @@ const styles = StyleSheet.create({
   },
 });
 
-const SignInForm = ({ onSubmit }) => {
+const SignUpForm = ({ onSubmit }) => {
   return (
     <View style={styles.container}>
       <FormikTextInput name="username" placeholder="Username" />
       <FormikTextInput name="password" placeholder="Password" secureTextEntry />
+      <FormikTextInput
+        name="passwordConfirmation"
+        placeholder="Password confirmation"
+        secureTextEntry
+      />
       <Pressable onPress={onSubmit}>
         <Text style={styles.button}>Sign in</Text>
       </Pressable>
@@ -58,21 +58,26 @@ const validationSchema = yup.object().shape({
     .string()
     .min(4, "Password must be at leat of length 4")
     .required("Password is required"),
+  passwordConfirmation: yup
+    .string()
+    .oneOf([yup.ref("password"), null], "password must match")
+    .required("Password confirm is required"),
 });
 
-export const SignInContainer = ({ onSubmit }) => {
+export const SignUpContainer = ({ onSubmit }) => {
   return (
     <Formik
       initialValues={initialValues}
       onSubmit={onSubmit}
       validationSchema={validationSchema}
     >
-      {({ handleSubmit }) => <SignInForm onSubmit={handleSubmit} />}
+      {({ handleSubmit }) => <SignUpForm onSubmit={handleSubmit} />}
     </Formik>
   );
 };
 
-const SignIn = () => {
+const SignUp = () => {
+  const [signUp] = useSignUp();
   const [signIn] = useSignIn();
 
   const onSubmit = async ({ username, password }) => {
@@ -82,14 +87,15 @@ const SignIn = () => {
     }
 
     try {
-      const { data } = await signIn({ username, password });
+      await signUp({ username, password });
+      await signIn({ username, password });
     } catch (error) {
       Alert.alert("Error", error.graphQLErrors[0].message);
       console.log(error);
     }
   };
 
-  return <SignInContainer onSubmit={onSubmit} />;
+  return <SignUpContainer onSubmit={onSubmit} />;
 };
 
-export default SignIn;
+export default SignUp;

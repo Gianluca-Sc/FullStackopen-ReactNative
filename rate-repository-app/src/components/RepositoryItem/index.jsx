@@ -1,6 +1,8 @@
-import { Image, StyleSheet, Text, View } from "react-native";
-import theme from "./theme";
-import { roundAmount } from "../utils";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { useNavigate } from "react-router-native";
+import theme from "../theme";
+import { roundAmount } from "../../utils/index";
+import * as Linking from "expo-linking";
 
 const styles = StyleSheet.create({
   container: {
@@ -48,7 +50,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const RepositoryItem = ({ item }) => {
+const RepositoryItem = ({ item, singleRepository = false }) => {
   const {
     fullName,
     description,
@@ -58,10 +60,15 @@ const RepositoryItem = ({ item }) => {
     reviewCount,
     ratingAverage,
     ownerAvatarUrl,
+    url,
   } = item;
 
+  const handlePress = () => {
+    Linking.openURL(url);
+  };
+
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="repositoryItem">
       <Header props={{ fullName, ownerAvatarUrl, description, language }} />
       <View style={styles.info}>
         <Stat text="Stars" amount={stargazersCount} />
@@ -69,6 +76,15 @@ const RepositoryItem = ({ item }) => {
         <Stat text="Reviews" amount={reviewCount} />
         <Stat text="Rating" amount={ratingAverage} />
       </View>
+      {singleRepository && (
+        <View style={[styles.language, { alignSelf: "center", width: "90%" }]}>
+          <Pressable onPress={handlePress}>
+            <Text style={{ color: "white", textAlign: "center", padding: 5 }}>
+              Open in Github
+            </Text>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 };

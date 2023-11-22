@@ -3,12 +3,34 @@ import { useState, useEffect } from "react";
 import { GET_REPOSITORIES } from "../grahql/queries";
 
 //GRAPHQL
-const useRepositories = () => {
-  const result = useQuery(GET_REPOSITORIES, {
+const useRepositories = ({ orderBy, orderDirection, searchKeyword, first }) => {
+  const { loading, error, data, fetchMore } = useQuery(GET_REPOSITORIES, {
     fetchPolicy: "cache-and-network",
+    variables: { orderBy, orderDirection, searchKeyword, first },
   });
 
-  return ({ loading, error, data } = result);
+  const handleFetchMore = () => {
+    const canFetchMore = !loading && data?.repositories.pageInfo.hasNextPage;
+
+    if (!canFetchMore) {
+      return;
+    }
+
+    fetchMore({
+      variables: {
+        after: data.repositories.pageInfo.endCursor,
+        orderBy,
+        orderDirection,
+        searchKeyword,
+        first,
+      },
+    });
+  };
+
+  const repositories = data?.repositories;
+  const pageInfo = data?.pageInfo;
+
+  return { loading, error, repositories, fetchMore: handleFetchMore, pageInfo };
 };
 
 export default useRepositories;
